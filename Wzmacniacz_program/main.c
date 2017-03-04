@@ -18,9 +18,7 @@
 int main(void)
 {
     // USTAWIENIE WYJŒÆ //
-
-	DDRB |= 0b11000000; // PB6, PB7
-	DDRD |= 0b00011111;  // PD0-PD4
+	DDRD |= 0b00111111;  // PD0-PD5
 
 	// USTAWIENIE WEJŒÆ //
 	PORTB |= 0b0000110; // ustawienie podciagania do VCC - porty domyœlnie jako wejœcia
@@ -33,18 +31,25 @@ int main(void)
 	short WZMACNIACZ_WLACZONY = 0;
 	short WZMACNIACZ_WYCISZONY = 0;
 
+	// ustawianie bitow na poczatku
+	PORTD &= 0<<5;
+	PORTD &= 0<<3;
+	PORTD &= 0<<4;
+	PORTD &= 0<<2;
+	_delay_ms(200);
+	PORTD &= 0<<0;
+	PORTD &= 0<<1;
+
     while (1) 
     {
-
-	PRZYCISK_MUTE_OLD = PRZYCISK_MUTE;
-	PRZYCISK_ON_OLD = PRZYCISK_ON;
 	PRZYCISK_ON = !(PINB &(1<<PB1));
 	PRZYCISK_MUTE = !(PINB &(1<<PB2));
-
+	//PRZYCISK_ON = PINB & 0b00000010;
+	//PRZYCISK_MUTE = PINB & 0b00000100;
+	
 	if(PRZYCISK_ON && !PRZYCISK_ON_OLD && WZMACNIACZ_WLACZONY) {
 		//wylaczenie przekaznikow
-		PORTB &= 0<<6;
-		PORTB &= 0<<7;
+		PORTD &= 0<<5;
 		//wylaczenie diody
 		PORTD &= 0<<3;
 		//wylaczenie glosnikow
@@ -54,12 +59,12 @@ int main(void)
 		PORTD &= 0<<1;
 
 		WZMACNIACZ_WLACZONY = 0;
+		PRZYCISK_ON_OLD = 1;
 			}
 	if(PRZYCISK_ON && !PRZYCISK_ON_OLD && !WZMACNIACZ_WLACZONY) {
 			
 			//wlaczenie przekaznikow
-			PORTB |= 1<<6;
-			PORTB |= 1<<7;
+			PORTD |= 1<<5;
 			//wlaczenie diody
 			PORTD |= 1<<3;
 			//wlaczenie glosnikow
@@ -70,6 +75,7 @@ int main(void)
 			PORTD |= 1<<2;
 
 			WZMACNIACZ_WLACZONY = 1;
+			PRZYCISK_ON_OLD = 1;
 	}
 
 	if(PRZYCISK_MUTE && !PRZYCISK_MUTE_OLD && WZMACNIACZ_WYCISZONY && WZMACNIACZ_WLACZONY) {
@@ -78,18 +84,34 @@ int main(void)
 		PORTD |= 1<<2;
 		// gaszenie diody
 		PORTD &= 0<<4;
+		PORTD |= 1<<3;
+
+		PORTD |= 1<<1;
+		PORTD |= 1<<5;
+		PORTD |= 1<<2;
+		PORTD |= 1<<0;
 
 		WZMACNIACZ_WYCISZONY = 0;
+		PRZYCISK_MUTE_OLD = 1;
 	}
 	if(PRZYCISK_MUTE && !PRZYCISK_MUTE_OLD && !WZMACNIACZ_WYCISZONY && WZMACNIACZ_WLACZONY) {
+		
 		//wyciszenie glosnikow
 		PORTD &= 0<<2;
 		PORTD &= 0<<0;
 		// zapalenie diody
 		PORTD |= 1<<4;
+		PORTD |= 1<<3;
+
+		PORTD |= 1<<1;
+		PORTD |= 1<<5;
 
 		WZMACNIACZ_WYCISZONY = 1;
+		PRZYCISK_MUTE_OLD = 1;
 	}
+
+	PRZYCISK_MUTE_OLD = PRZYCISK_MUTE;
+	PRZYCISK_ON_OLD = PRZYCISK_ON;
     }
 }
 
